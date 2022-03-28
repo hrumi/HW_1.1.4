@@ -1,35 +1,38 @@
 package jm.task.core.jdbc.util;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import jm.task.core.jdbc.model.User;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
+import java.util.Properties;
+
 
 public class Util {
-    private static final String dbURL = "jdbc:mysql://localhost:3306/new_schema_1";
-    private static final String dbUsername = "hrumi";
-    private static final String dbPassword = "Lapoipopopeh";
 
-    public Connection getConnection() {
-        Connection connection = null;
-            try {
-                connection = DriverManager.getConnection(dbURL, dbUsername, dbPassword);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        return connection;
-        }
+    private static SessionFactory sessionFactory;
 
-    public void closeConnection (Connection connection) {
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+    public SessionFactory getSession() {
+        Properties pr = new Properties();
+        pr.setProperty("hibernate.connection.url", "jdbc:mysql://localhost:3306/new_schema_2");
+        pr.setProperty("hibernate.connection.username", "hrumi");
+        pr.setProperty("hibernate.connection.password", "Lapoipopopeh");
+        pr.setProperty("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
+        pr.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
+        pr.setProperty("show_sql", "true");
+        pr.setProperty("format_sql", "true");
+
+        if (sessionFactory == null) {
+                Configuration configuration = new Configuration().addProperties(pr);
+                configuration.addAnnotatedClass(User.class);
+                ServiceRegistry sr = new StandardServiceRegistryBuilder().applySettings(pr).build();
+                sessionFactory = configuration.buildSessionFactory(sr);
         }
+        return sessionFactory;
     }
+
+    public void closeSessionFactory (SessionFactory sf) {
+            sf.close();
+    }
+
 }

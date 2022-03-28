@@ -16,8 +16,5 @@ public class Main {
         us.getAllUsers().forEach(System.out::println);
         us.cleanUsersTable();
         us.dropUsersTable();
-
-        Util util = new Util();
-        util.closeConnection(util.getConnection());
     }
 }
