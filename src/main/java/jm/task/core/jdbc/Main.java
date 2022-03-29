@@ -6,7 +6,6 @@ import jm.task.core.jdbc.util.Util;
 
 public class Main {
     public static void main(String[] args) {
-        // реализуйте алгоритм здесь
         UserService us = new UserServiceImpl();
         us.createUsersTable();
         us.saveUser("Барт", "Симпсон", (byte) 10);
