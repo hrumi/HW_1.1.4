@@ -11,11 +11,10 @@ import java.util.List;
 
 public class UserDaoHibernateImpl implements UserDao {
 
-    private static SessionFactory sf;
-    public UserDaoHibernateImpl() {
-        sf = new Util().getSession();
-    }
+    private final  SessionFactory sf = new Util().getSession();
 
+    public UserDaoHibernateImpl() {
+    }
 
     @Override
     public void createUsersTable() {
@@ -31,24 +30,26 @@ public class UserDaoHibernateImpl implements UserDao {
                     + ")").addEntity(User.class).executeUpdate();
             session.getTransaction().commit();
         } catch (Exception e) {
+            sf.getCurrentSession().getTransaction().rollback();
             e.printStackTrace();
         }
     }
 
     @Override
     public void dropUsersTable() {
-        try (Session session = sf.openSession()) {
+        try (Session session = new Util().getSession().openSession()) {
             session.beginTransaction();
             session.createSQLQuery("DROP TABLE IF EXISTS user").executeUpdate();
             session.getTransaction().commit();
         } catch (Exception e) {
+            sf.getCurrentSession().getTransaction().rollback();
             e.printStackTrace();
         }
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        try (Session session = sf.openSession()) {
+        try (Session session = new Util().getSession().openSession()) {
             session.beginTransaction();
             session.persist(new User(name, lastName, age));
             session.getTransaction().commit();
@@ -60,7 +61,7 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public void removeUserById(long id) {
-        try (Session session = sf.openSession()) {
+        try (Session session = new Util().getSession().openSession()) {
             session.beginTransaction();
             User user = session.load(User.class, id);
             session.delete(user);
@@ -74,18 +75,21 @@ public class UserDaoHibernateImpl implements UserDao {
 
     @Override
     public List<User> getAllUsers() {
-        try (Session session = sf.openSession()) {
+        try (Session session = new Util().getSession().openSession()) {
+            session.beginTransaction();
             String hql = "from User";
+            session.getTransaction().commit();
             return session.createQuery(hql, User.class).list();
         } catch (Exception e) {
+            sf.getCurrentSession().getTransaction().rollback();
             e.printStackTrace();
         }
-        return new ArrayList<>() ;
+        return new ArrayList<>();
     }
 
     @Override
     public void cleanUsersTable() {
-        try (Session session = sf.openSession()) {
+        try (Session session = new Util().getSession().openSession()) {
             session.beginTransaction();
             String hql = "delete from User";
             session.createQuery(hql).executeUpdate();
